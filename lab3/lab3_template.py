@@ -21,6 +21,7 @@ Special Instructions: None
 import sys
 import matplotlib.pylab as plt
 import numpy as np
+import statistics
 
 # Pseudocode:
 # 1) get the name of the data file from the user on the command line
@@ -42,10 +43,30 @@ def parse_data(infile):
     :return: two lists. One list with the information from the third column (date)
                         One list with the information from the fourth column (temperature)
     """
-    wdates = []             # list of dates data
-    wtemperatures = []      # list of temperarture data
+    data = []
+    with open(infile) as file:
+        rows = file.readlines()
+
+        for each in rows:
+                data.append(each.split())
+
+        wdates = [item[2] for item in data[1:]]             # list of YEARMODA 
+        wtemperatures = [float(item[3]) for item in data[1:]]      # list of temperarture data
 
     return wdates, wtemperatures
+
+def YEARMODA_to_Year(wdates):
+
+    int_years = []
+
+    for each in wdates:
+        month = int(each[4:6])/12
+        day = int(each[6:8])/365
+        each = int(each[:4]) + month + day
+
+        int_years.append(each)
+
+    return int_years
 
 
 def calc_mean_std_dev(wdates, wtemp):
@@ -55,10 +76,27 @@ def calc_mean_std_dev(wdates, wtemp):
     :param wdates: list with dates fields
     :param wtemp: temperature per month
     :return: means, std_dev: months_mean and std_dev lists
+
     """
+ 
     means = []
     std_dev = []
 
+
+    yearDict = {}
+
+    yearmo = set( [each[4:6] for each in wdates] )
+    for month in yearmo:
+            yearDict[month] = []
+
+    for i, each in enumerate(wdates):
+        yearDict[each[4:6]].append(wtemp[i])
+
+
+    for key in sorted(yearDict):
+        means.append( sum(yearDict[key])/len(yearDict[key]) )
+        std_dev.append( statistics.pstdev(yearDict[key]) )        
+    print(means, std_dev)
     return means, std_dev
 
 
@@ -83,12 +121,13 @@ def plot_data_task1(wyear, wtemp, month_mean, month_std):
     plt.ylabel("Temperature, F")
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
     monthNumber = list(range(1, 13, 1))
     plt.xlim([0.7, 13])
     plt.ylim([0, 90])
     width = 0.8
-    plt.bar(monthNumber, month_mean, yerr=month_std, width=width,
-            color="lightgreen", ecolor="black", linewidth=1.5)
+    plt.bar(monthNumber, month_mean, yerr=month_std, width=width, color="lightgreen",  linewidth=1.5)
+
     plt.xticks(monthNumber, months)
     plt.show()      # display plot
 
@@ -104,13 +143,19 @@ def plot_data_task2(xxx):
 
 
 def main(infile):
+
     weather_data = infile    # take data file as input parameter to file
     wdates, wtemperatures = parse_data(weather_data)
+
+    wyear =  YEARMODA_to_Year(wdates)
+
     # Calculate mean and standard dev per month
     month_mean, month_std = calc_mean_std_dev(wdates, wtemperatures)
+
+
     # TODO: Make sure you have a list of:
     #       1) years, 2) temperature, 3) month_mean, 4) month_std
-    plot_data_task1(wyear, wtemp, month_mean, month_std)
+    plot_data_task1(wyear, wtemperatures, month_mean, month_std)
     # TODO: Create the data you need for this
     # plot_data_task2(xxx)
 
@@ -120,5 +165,6 @@ if __name__ == "__main__":
     # infile = 'data/CDO6674605799016.txt'  # for testing
     # Note: the 0th argument is the program itself.
     infile = sys.argv[1]
+
     main(infile)
     exit(0)
