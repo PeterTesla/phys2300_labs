@@ -2,9 +2,9 @@
 Assignment to learn how to interpolate data1
 '''
 import sys
-# import matplotlib.pyplot as plt
-# import numpy as np
-# import scipy
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy
 import csv
 
 def get_hours(time_str):
@@ -16,6 +16,13 @@ def get_hours(time_str):
         return (int(h) + int(m)/60 + int(s)/3600)
     except:
         return "NaN"
+
+def zero_time(time):
+    '''
+    Take a list of time data points and make the first point t = 0, then adjust all subsequent points
+    '''
+    init = time[0]
+    time[:] = [t - init for t in time]
 
 def read_wx_data(wx_file, harbor_data):
     """
@@ -29,6 +36,8 @@ def read_wx_data(wx_file, harbor_data):
     wx_data =[]
     wx_temperatures = []
     wx_times = []
+    harbor_data['wx_temperatures'] = []
+    harbor_data['wx_times'] = []
 
     with open(wx_file, newline = '') as data:
         stuff = csv.reader(data, delimiter=',')
@@ -40,12 +49,15 @@ def read_wx_data(wx_file, harbor_data):
     for each in wx_data:
         wx_times.append( get_hours(each[1]) )
 
+    zero_time(wx_times)
+
     for each in wx_data:
-        wx_temperatures.append( each[3] )
+        wx_temperatures.append( float(each[3]) )
 
-    harbor_data['wx_temperatures'] = wx_temperatures
-    harbor_data['wx_times'] = wx_times
-
+    for i, time in enumerate(wx_times):
+        if time < harbor_data['gps_times'][-1]:
+            harbor_data['wx_temperatures'].append(wx_temperatures[i])
+            harbor_data['wx_times'].append(wx_times[i])
 
 
 def read_gps_data(gps_file, harbor_data):
@@ -69,13 +81,13 @@ def read_gps_data(gps_file, harbor_data):
 
     for each in gps_data:
         gps_times.append( get_hours(each[0] + ':' + each[1] + ':' + each[2]) )    
+    zero_time(gps_times)
 
     for each in gps_data:
-        gps_altitude.append( each[6] )    
+        gps_altitude.append( float(each[6]) )    
 
     harbor_data['gps_altitude'] = gps_altitude
     harbor_data['gps_times'] = gps_times
-
 
 
 def interpolate_wx_from_gps(harbor_data):
@@ -90,8 +102,22 @@ def interpolate_wx_from_gps(harbor_data):
     :return: Nothing
     """
 
+    harbor_data['crltd_alt_up'] = []
+    harbor_data['crltd_temp_up'] = []
+    harbor_data['crltd_alt_down'] = []
+    harbor_data['crltd_temp_down'] = []
 
-    pass
+    interp_altitude = np.interp(harbor_data['wx_times'], harbor_data['gps_times'], harbor_data['gps_altitude'])
+
+    for i, alt in enumerate(interp_altitude):
+        if (alt - interp_altitude[i-1])/(harbor_data['wx_times'][i] - harbor_data['wx_times'][i-1]) > 0:
+            harbor_data['crltd_alt_up'].append(alt)
+            harbor_data['crltd_temp_up'].append(harbor_data['wx_temperatures'][i])
+        else:
+            harbor_data['crltd_alt_down'].append(alt)
+            harbor_data['crltd_temp_down'].append(harbor_data['wx_temperatures'][i])
+
+
 
 
 def plot_figs(harbor_data):
@@ -100,10 +126,34 @@ def plot_figs(harbor_data):
     :param harbor_data: A dictionary to collect data.
     :return: nothing
     """
+    fig1, [temp, altitude] = plt.subplots(2, 1, sharex=True)
 
-    
+             # select first subplot
+    temp.set_title("Harbor Flight Data")
+    temp.plot(harbor_data['wx_times'], harbor_data['wx_temperatures'], color='black')
+    temp.set_ylabel("Temperature, (F)")
 
-    pass
+    temp.set_ylim(-50,80)
+
+    altitude.plot(harbor_data['gps_times'], harbor_data['gps_altitude'], color='black')
+    altitude.set_ylabel("Altitude, (Ft)")
+    plt.xlabel("Time (H)")
+
+    fig2, [rising,falling] = plt.subplots(1,2, sharey=True)
+
+    rising.set_title("Harbor Ascent Data")
+    rising.plot(harbor_data['crltd_temp_up'],harbor_data['crltd_alt_up'], color='black')
+    rising.set_ylabel("Altitude (ft)")
+    rising.set_xlabel("Temperature (F)")
+
+    falling.set_title("Harbor Descent Data")
+    falling.plot(harbor_data['crltd_temp_down'],harbor_data['crltd_alt_down'], color='black')
+    falling.set_xlabel( "Temperature (F)" )
+
+    plt.show()
+
+
+
 
 
 def main():
@@ -117,13 +167,15 @@ def main():
     wx_file = sys.argv[1]                   # first program input param as filepath
     gps_file = sys.argv[2]                  # second program input param as filepath
 
+    read_gps_data(gps_file, harbor_data)    # collect gps dataw
     read_wx_data(wx_file, harbor_data)      # collect weather data
-    read_gps_data(gps_file, harbor_data)    # collect gps data
 
-    #interpolate_wx_from_gps(harbor_data)    # calculate interpolated data
-    #plot_figs(harbor_data)                  # display figures
+    interpolate_wx_from_gps(harbor_data)    # calculate interpolated data
+    plot_figs(harbor_data)                  # display figures
+
 
 
 if __name__ == '__main__':
+
     main()
     exit(0)
