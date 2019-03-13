@@ -74,7 +74,6 @@ def read_gps_data(gps_file, harbor_data):
     :param harbor_data: A dictionary to collect data.
     :return: Nothing
     """
-    
     gps_data =[]
     gps_altitude = []
     gps_times = []
@@ -95,6 +94,7 @@ def read_gps_data(gps_file, harbor_data):
 
     harbor_data['gps_altitude'] = gps_altitude
     harbor_data['gps_times'] = gps_times
+
 
 def interpolate_wx_from_gps(harbor_data):
     """
@@ -128,13 +128,14 @@ def interpolate_wx_from_gps(harbor_data):
     del harbor_data['crltd_alt_down'][0]
 
 
+
+
 def plot_figs(harbor_data):
     """
     Plot 2 figures with 2 subplots each.
     :param harbor_data: A dictionary to collect data.
     :return: nothing
     """
-
     fig1, [temp, altitude] = plt.subplots(2, 1, sharex=True)
 
     temp.set_title("Harbor Flight Data")
@@ -166,7 +167,6 @@ def main():
     Main function
     :return: Nothing
     """
-
     harbor_data = {}
 
     wx_file = sys.argv[1]                   # first program input param as filepath
@@ -180,5 +180,6 @@ def main():
 
 
 if __name__ == '__main__':
+
     main()
     exit(0)

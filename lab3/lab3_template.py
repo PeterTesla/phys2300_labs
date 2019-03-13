@@ -96,7 +96,7 @@ def calc_mean_std_dev(wdates, wtemp):
     for key in sorted(yearDict):
         means.append( sum(yearDict[key])/len(yearDict[key]) )
         std_dev.append( statistics.pstdev(yearDict[key]) )        
-    print(means, std_dev)
+
     return means, std_dev
 
 
