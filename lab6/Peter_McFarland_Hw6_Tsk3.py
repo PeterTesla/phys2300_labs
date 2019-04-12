@@ -77,7 +77,7 @@ def main():
     Set_Scene(theta)
 
     pendulum_1 = pendulum(theta, omega, color.cyan)
-    pendulum_2 = pendulum(theta - np.pi, 25, color.orange)
+ #   pendulum_2 = pendulum(theta - np.pi, omega + 5, color.orange)
 
     t_points = []
     while t < 10:
@@ -87,8 +87,8 @@ def main():
         pendulum_1.CalculatePos(t,dt)
         pendulum_1.UpdatePos()
 
-        pendulum_2.CalculatePos(t,dt)
-        pendulum_2.UpdatePos()
+ #       pendulum_2.CalculatePos(t,dt)
+ #       pendulum_2.UpdatePos()
 
         t_points.append(t)
         t = t + dt
@@ -96,7 +96,7 @@ def main():
 
     # Plot Values
     plt.plot(t_points, pendulum_1.theta_points)
-    plt.plot(t_points, pendulum_2.theta_points)
+    #plt.plot(t_points, pendulum_2.theta_points)
     plt.xlabel("time (s) ")
     plt.ylabel("theta (rad) ")
     plt.show()

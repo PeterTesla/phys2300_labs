@@ -55,7 +55,7 @@ def Set_Scene(theta):
     scene.width = 1200
     scene.heigth = 1200
     scene.autoscale = True
-
+    #ball = sphere()
 
 def domega(theta, omega, t):
         return -(g/l)*np.sin(theta) -c*omega
@@ -68,7 +68,7 @@ def main():
     """
     """
     #Initial Positions
-    theta = np.radians(179)
+    theta = np.radians(125)
     omega = 0
 
     t = 0
@@ -77,10 +77,10 @@ def main():
     Set_Scene(theta)
 
     pendulum_1 = pendulum(theta, omega, color.cyan)
-    pendulum_2 = pendulum(theta - np.pi, 25, color.orange)
+    pendulum_2 = pendulum(theta - np.pi, omega + 5, color.orange)
 
     t_points = []
-    while t < 10:
+    while t < 3:
 
         rate(framerate)
         

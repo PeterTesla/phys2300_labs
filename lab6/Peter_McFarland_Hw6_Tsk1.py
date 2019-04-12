@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from vpython import *
+#from vpython import *
 
 g = 9.81    # m/s**2
 l = 0.1     # meters
@@ -19,12 +19,13 @@ class pendulum:
                 self.theta_points = []
                 self.omega_points = []
 
-                self.string = cylinder(pos = vector(0,0,0), axis = vector(l*np.sin(self.theta), -l*np.cos(self.theta), 0), radius = W)
-                self.ball = sphere(pos = vector(l*np.sin(self.theta),-l*np.cos(self.theta),0), radius = R, make_trail = True, color = Color)
+                #self.string = cylinder(pos = vector(0,0,0), axis = vector(l*np.sin(self.theta), -l*np.cos(self.theta), 0), radius = W)
+                #self.ball = sphere(pos = vector(l*np.sin(self.theta),-l*np.cos(self.theta),0), radius = R, make_trail = True, color = Color)
 
         def UpdatePos(self):
-                self.string.axis = vector(l*np.sin(self.theta), -l*np.cos(self.theta), 0)
-                self.ball.pos = vector(l*np.sin(self.theta),-l*np.cos(self.theta),0)
+                pass
+                #self.string.axis = vector(l*np.sin(self.theta), -l*np.cos(self.theta), 0)
+                #self.ball.pos = vector(l*np.sin(self.theta),-l*np.cos(self.theta),0)
 
         def CalculatePos(self, t, dt):
                 
@@ -50,15 +51,15 @@ class pendulum:
 
 
 
-def Set_Scene(theta):
-    scene.title = "Assignment 6: Pendulum"
-    scene.width = 1200
-    scene.heigth = 1200
-    scene.autoscale = True
-
+#def Set_Scene(theta):
+#    scene.title = "Assignment 6: Pendulum"
+#    scene.width = 1200
+#    scene.heigth = 1200
+#    scene.autoscale = True
+    #ball = sphere()
 
 def domega(theta, omega, t):
-        return -(g/l)*np.sin(theta) -c*omega
+        return -(g/l)*np.sin(theta) 
 
 
 def dtheta(omega, t):
@@ -74,21 +75,21 @@ def main():
     t = 0
     dt = 0.005
 
-    Set_Scene(theta)
+ #   Set_Scene(theta)
 
-    pendulum_1 = pendulum(theta, omega, color.cyan)
-    pendulum_2 = pendulum(theta - np.pi, 25, color.orange)
+    pendulum_1 = pendulum(theta, omega, "blue")
+ #   pendulum_2 = pendulum(theta - np.pi, omega + 5, color.orange)
 
     t_points = []
     while t < 10:
 
-        rate(framerate)
+ #       rate(framerate)
         
         pendulum_1.CalculatePos(t,dt)
         pendulum_1.UpdatePos()
 
-        pendulum_2.CalculatePos(t,dt)
-        pendulum_2.UpdatePos()
+ #       pendulum_2.CalculatePos(t,dt)
+ #       pendulum_2.UpdatePos()
 
         t_points.append(t)
         t = t + dt
@@ -96,7 +97,7 @@ def main():
 
     # Plot Values
     plt.plot(t_points, pendulum_1.theta_points)
-    plt.plot(t_points, pendulum_2.theta_points)
+ #  plt.plot(t_points, pendulum_2.theta_points)
     plt.xlabel("time (s) ")
     plt.ylabel("theta (rad) ")
     plt.show()
